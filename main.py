@@ -243,5 +243,5 @@ def get_binary(bid: str):
         outcome(404, "not-found", f"Binary/{bid} no existe")
     b = binaries[bid]
     return Response(content=b["data"], media_type=b["contentType"])
-Page Redirection to current version of DICOM Controlled Terminology Definitions
+
  
