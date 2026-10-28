@@ -342,14 +342,17 @@ async function cargar() {
     const inst = ((await (await fetch(`/fhir/ImagingStudy/${s.id}/instances`)).json()).entry || [])
       .map(x => x.resource);
 
+    const dispId = s.series[0]?.performer?.[0]?.actor?.reference?.split("/")[1];
+    let equipo = "No registrado";
+    if (dispId) {
+      const disp = await (await fetch("/fhir/Device/" + dispId)).json();
+      equipo = disp.type.text + " — " + disp.manufacturer + " " + disp.deviceName[0].name +
+        " (serie " + (disp.serialNumber || "no registrada") + ")";
+    }
+
     const nombre = pac.name[0].given[0] + " " + pac.name[0].family;
     const hc = pac.identifier[0].value;
     const fecha = new Date(s.started).toLocaleString("es-CO", {dateStyle: "long", timeStyle: "short"});
-    const dispId = s.series[0]?.performer?.[0]?.actor?.reference?.split("/")[1];
-    const disp = dispId ? await (await fetch("/fhir/Device/" + dispId)).json() : null;
-    const equipo = disp
-      ? ${disp.type.text} — ${disp.manufacturer} ${disp.deviceName[0].name} (serie ${disp.serialNumber ?? "no registrada"})
-      : "No registrado";
     const series = s.series.map(sr => esc(sr.description) + " (" + sr.numberOfInstances + " cortes)").join("<br>");
 
     const card = document.createElement("div");
